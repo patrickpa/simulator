@@ -22,3 +22,5 @@ MonoBehaviour:
     spriteImg: {fileID: 21300000, guid: 6920f8282495490449131f1de291ced9, type: 3}
   - sceneAsset: {fileID: 102900000, guid: 8df31bfe5e4fe814a932d71b4fad0b8f, type: 3}
     spriteImg: {fileID: 0}
+  - sceneAsset: {fileID: 102900000, guid: 5a70bcfcb18978c49885867bbdc506f3, type: 3}
+    spriteImg: {fileID: 0}
