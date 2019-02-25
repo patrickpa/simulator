@@ -118,7 +118,7 @@ public class NPCManager : MonoBehaviour
         currentPooledNPCs.Clear();
         activeNPCCount = 0;
 
-        int poolCount = Mathf.FloorToInt(npcCount + (npcCount * 0.1f));
+        int poolCount = Mathf.FloorToInt(npcCount + (npcCount * 0.01f));
         for (int i = 0; i < poolCount; i++)
         {
             GameObject go = Instantiate(npcPrefab, transform);
