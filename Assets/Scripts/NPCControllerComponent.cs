@@ -23,7 +23,7 @@ public class NPCControllerComponent : MonoBehaviour
     private float minHitDistance = 10.0f;
     private bool detectFront = true;
     private const float frontRaycastDistance = 10.0f;
-    private const float stopDistance = 300.0f;
+    private const float stopDistance = 70.0f;
     private int groundHitBitmask = -1;
     private int carCheckBlockBitmask = -1;
 
@@ -47,7 +47,7 @@ public class NPCControllerComponent : MonoBehaviour
     //private Vector3 nextTarget; for intersection checks or new node waypoint[0]
     //private bool doRaycast;
     //private float nextRaycast = 0f;
-    private Vector2 normalSpeedRange = new Vector2(40.0f, 60.0f);
+    private Vector2 normalSpeedRange = new Vector2(18.0f, 20.0f);
     private float normalSpeed = 0f;
     private float targetSpeed;
     private float currentSpeed;
