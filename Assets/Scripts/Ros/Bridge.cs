@@ -35,8 +35,12 @@ namespace Ros
     public class Bridge
     {
         public static bool canConnect = false; // THIS IS VERY VERY BAD!! PLEASE DONT USE GLOBAL VARIABLES :(
+
+        //Msg Logging Variables//
+        public bool enable_msg_log = false;
         private StringBuilder csv = new StringBuilder();
         private Stopwatch StartTimer = new Stopwatch();
+        //END//
 
         WebSocket Socket;
 
@@ -886,23 +890,25 @@ namespace Ros
 
         void MsgLogWrite(string kind, string topic)
         {
-            StartTimer.Stop();
+            if (enable_msg_log) {
+                StartTimer.Stop();
 
-            long lElapsedTicks = StartTimer.ElapsedTicks;
-            long lTicksPerSecond = Stopwatch.Frequency;
-            double lMilliseconds = 1000.0 * (double)lElapsedTicks / (double)lTicksPerSecond;
+                long lElapsedTicks = StartTimer.ElapsedTicks;
+                long lTicksPerSecond = Stopwatch.Frequency;
+                double lMilliseconds = 1000.0 * (double)lElapsedTicks / (double)lTicksPerSecond;
 
-            double time_stamp = lMilliseconds / 1000;
-            var newMsg = string.Format("{0},{1},{2},{3}", kind, topic, time_stamp, Port);
+                double time_stamp = lMilliseconds / 1000;
+                var newMsg = string.Format("{0},{1},{2},{3}", kind, topic, time_stamp, Port);
 
-            csv.AppendLine(newMsg);
+                csv.AppendLine(newMsg);
 
-            StartTimer.Start();
+                StartTimer.Start();
+            }
         }
 
         void MsgLogInit()
         {
-            if (csv.Length == 0) {
+            if (csv.Length == 0 && enable_msg_log) {
                 System.IO.File.WriteAllText(string.Format("msgs_log-{0}_{1}.csv", Address, Port), string.Empty);
                 StartTimer.Start();
                 csv.AppendLine(string.Format("type,topic-service,time_stamp,{0}_{1}", Address, Port));
@@ -911,8 +917,10 @@ namespace Ros
 
         void MsgLogWriteOut()
         {
-            System.IO.File.AppendAllText(string.Format("msgs_log-{0}_{1}.csv", Address, Port), csv.ToString());
-            csv = new StringBuilder();
+            if (enable_msg_log) {
+                System.IO.File.AppendAllText(string.Format("msgs_log-{0}_{1}.csv", Address, Port), csv.ToString());
+                csv = new StringBuilder();
+            }
         }
 
     }

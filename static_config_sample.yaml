@@ -8,6 +8,7 @@ initial_configuration:
   enable_traffic : true
   enable_pedestrian : true
   traffic_density : 300
+  enable_msg_log: true
 vehicles : 
   - type : XE_Rigged-autoware
     address : localhost
@@ -26,22 +27,22 @@ vehicles :
       r : 0.0
       p : 0.0
       y : 269.9
-  - type : XE_Rigged-apollo
-    address : localhost
-    port : 9091
-    command_type : twist
-    enable_lidar : false
-    enable_gps : false
-    enable_imu : true
-    enable_main_camera : false
-    enable_telephoto_camera : false
-    enable_sensor_effects : false
-    enable_high_quality_rendering : false
-    position : 
-      n : 4182779
-      e : 52880
-      h : 10.1
-    orientation : 
-      r : 0.0
-      p : 0.0
-      y : 269.9
+  # - type : XE_Rigged-apollo
+  #   address : localhost
+  #   port : 9091
+  #   command_type : twist
+  #   enable_lidar : false
+  #   enable_gps : false
+  #   enable_imu : true
+  #   enable_main_camera : false
+  #   enable_telephoto_camera : false
+  #   enable_sensor_effects : false
+  #   enable_high_quality_rendering : false
+  #   position : 
+  #     n : 4182779
+  #     e : 52880
+  #     h : 10.1
+  #   orientation : 
+  #     r : 0.0
+  #     p : 0.0
+  #     y : 269.9

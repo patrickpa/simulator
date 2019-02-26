@@ -63,6 +63,11 @@ public class RosBridgeConnector
         agentType = type;
     }
 
+    public void UpdateBridgeLogStatus(bool log_status)
+    {
+        Bridge.enable_msg_log = log_status;
+    }
+
     public void Disconnect()
     {
         connectTime = Time.time + 1.0f;

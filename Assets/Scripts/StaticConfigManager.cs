@@ -36,6 +36,7 @@ public class InitialConfiguration
     public bool enable_traffic { get; set; }
     public bool enable_pedestrian { get; set; }
     public int traffic_density { get; set; }
+    public bool enable_msg_log {get; set;} = false;
 }
 
 public class VehicleConfig
@@ -174,7 +175,10 @@ public class StaticConfigManager : MonoBehaviour
                         }
                     }
 
-                    ROSAgentManager.Instance.activeAgents.Add(new RosBridgeConnector(staticVehicle.address, staticVehicle.port, candidate));
+                    RosBridgeConnector new_ros_bridge = new RosBridgeConnector(staticVehicle.address, staticVehicle.port, candidate);
+                    new_ros_bridge.UpdateBridgeLogStatus(staticConfig.initial_configuration.enable_msg_log);
+
+                    ROSAgentManager.Instance.activeAgents.Add(new_ros_bridge);
                 }
             }
 
