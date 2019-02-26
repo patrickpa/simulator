@@ -34,6 +34,7 @@ namespace Ros
     public class Bridge
     {
         public static bool canConnect = false; // THIS IS VERY VERY BAD!! PLEASE DONT USE GLOBAL VARIABLES :(
+        private StringBuilder csv = new StringBuilder();
 
         WebSocket Socket;
 
@@ -79,6 +80,7 @@ namespace Ros
 
         public void Connect(string address, int port, int version)
         {
+            csv.AppendLine("type,topic-service,time_stamp");
             Address = address;
             Port = port;
             Version = version;
@@ -107,6 +109,7 @@ namespace Ros
                 {
                     Status = Status.Disconnecting;
                     Socket.CloseAsync();
+                    System.IO.File.WriteAllText("msgs_log.csv", csv.ToString());
                 }
             }
         }
@@ -150,6 +153,7 @@ namespace Ros
             var json = JSONNode.Parse(args.Data);
             string op = json["op"];
 
+            // receive a msg from a publisher - Receive
             if (op == "publish")
             {
                 string topic = json["topic"];
@@ -167,19 +171,39 @@ namespace Ros
                         }
                         lock (QueuedActions)
                         {
-                            QueuedActions.Enqueue(() => sub.Callback.DynamicInvoke(data));
+                            QueuedActions.Enqueue(() => 
+                            {
+                                // code to write to a file
+                                DateTime now = DateTime.Now;
+                                var time_stamp = now.ToString();
+                                var newReceive = string.Format("receive,{0},{1}", topic, time_stamp);
+                                csv.AppendLine(newReceive);
+                                // end
+
+                                sub.Callback.DynamicInvoke(data);
+                            });
                         }
                     }
                 }
             }
+
+            // receive a msg calling for a service - Send
             else if (op == "call_service")
             {
+
                 var service = json["service"];
                 var id = json["id"];
                 if (!Services.ContainsKey(service))
                 {
                     return;
                 }
+
+                // code to write to a file
+                DateTime now_r = DateTime.Now;
+                var time_stamp_r = now_r.ToString();
+                var newReceive = string.Format("call_service_receive,{0},{1}", service, time_stamp_r);
+                csv.AppendLine(newReceive);
+                // end
 
                 var callback = Services[service];
 
@@ -214,6 +238,13 @@ namespace Ros
                             sb.Append("\"result\":true");
                         }
                         sb.Append('}');
+
+                        // code to write to a file
+                        DateTime now = DateTime.Now;
+                        var time_stamp = now.ToString();
+                        var newServiceResponse = string.Format("service_response_sent,{0},{1}", service, time_stamp);
+                        csv.AppendLine(newServiceResponse);
+                        // end
 
                         var s = sb.ToString();
                         Socket.SendAsync(s, ok => { });
@@ -269,6 +300,13 @@ namespace Ros
                 Type = type,
             });
 
+            // code to write to a file
+            DateTime now = DateTime.Now;
+            var time_stamp = now.ToString();
+            var newPublisher = string.Format("publisher,{0},{1}", topic, time_stamp);
+            csv.AppendLine(newPublisher);
+            // end
+
             //UnityEngine.Debug.Log("Adding publisher " + sb.ToString());
             Socket.SendAsync(sb.ToString(), ok => { });
         }
@@ -298,10 +336,18 @@ namespace Ros
             }
             sb.Append('}');
 
+            // code to write to a file
+            DateTime now = DateTime.Now;
+            var time_stamp = now.ToString();
+            var newService = string.Format("add_service,{0},{1}", service, time_stamp);
+            csv.AppendLine(newService);
+            // end
+
             Services.Add(service, callback);
             Socket.SendAsync(sb.ToString(), ok => { });
         }
 
+        // send msg to a topic
         public void Publish<T>(string topic, T message, Action completed = null)
         {
             var sb = new StringBuilder(128);
@@ -321,12 +367,25 @@ namespace Ros
             var s = sb.ToString();
             //UnityEngine.Debug.Log("Publishing " + s.Substring(0, s.Length > 200 ? 200 : s.Length));
 
+            DateTime now = DateTime.Now;
+            var time_stamp = now.ToString();
+
             if (completed == null)
             {
+                // code to write to a file
+                var newPublish = string.Format("publish,{0},{1}", topic, time_stamp);
+                csv.AppendLine(newPublish);
+                // end
+
                 Socket.SendAsync(s, ok => { });
             }
             else
             {
+                // code to write to a file
+                var newPublish = string.Format("publish,{0},{1}", topic, time_stamp);
+                csv.AppendLine(newPublish);
+                // end
+
                 Socket.SendAsync(s, ok => completed());
             }
         }
@@ -366,6 +425,13 @@ namespace Ros
                 Name = topic,
                 Type = type,
             });
+
+            // code to write to a file
+            DateTime now = DateTime.Now;
+            var time_stamp = now.ToString();
+            var newSubscribe = string.Format("subscribe,{0},{1}", topic, time_stamp);
+            csv.AppendLine(newSubscribe);
+            // end
 
             //UnityEngine.Debug.Log("Adding subscriber " + sb.ToString());
             Socket.SendAsync(sb.ToString(), ok => { });
