@@ -8,6 +8,7 @@
 
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using WebSocketSharp;
 using SimpleJSON;
@@ -35,6 +36,7 @@ namespace Ros
     {
         public static bool canConnect = false; // THIS IS VERY VERY BAD!! PLEASE DONT USE GLOBAL VARIABLES :(
         private StringBuilder csv = new StringBuilder();
+        private Stopwatch StartTimer = new Stopwatch();
 
         WebSocket Socket;
 
@@ -80,7 +82,7 @@ namespace Ros
 
         public void Connect(string address, int port, int version)
         {
-            csv.AppendLine("type,topic-service,time_stamp");
+
             Address = address;
             Port = port;
             Version = version;
@@ -94,6 +96,7 @@ namespace Ros
                 Socket.OnClose += OnClose;
                 Status = Status.Connecting;
                 Socket.ConnectAsync();
+                MsgLogInit();
             }
             catch (Exception e)
             {
@@ -109,7 +112,7 @@ namespace Ros
                 {
                     Status = Status.Disconnecting;
                     Socket.CloseAsync();
-                    System.IO.File.WriteAllText("msgs_log.csv", csv.ToString());
+                    MsgLogWriteOut();
                 }
             }
         }
@@ -174,11 +177,7 @@ namespace Ros
                             QueuedActions.Enqueue(() => 
                             {
                                 // code to write to a file
-                                DateTime now = DateTime.Now;
-                                var time_stamp = now.ToString();
-                                var newReceive = string.Format("receive,{0},{1}", topic, time_stamp);
-                                csv.AppendLine(newReceive);
-                                // end
+                                MsgLogWrite("receive", topic);
 
                                 sub.Callback.DynamicInvoke(data);
                             });
@@ -199,11 +198,7 @@ namespace Ros
                 }
 
                 // code to write to a file
-                DateTime now_r = DateTime.Now;
-                var time_stamp_r = now_r.ToString();
-                var newReceive = string.Format("call_service_receive,{0},{1}", service, time_stamp_r);
-                csv.AppendLine(newReceive);
-                // end
+                MsgLogWrite("call_service_receive", service);
 
                 var callback = Services[service];
 
@@ -240,11 +235,7 @@ namespace Ros
                         sb.Append('}');
 
                         // code to write to a file
-                        DateTime now = DateTime.Now;
-                        var time_stamp = now.ToString();
-                        var newServiceResponse = string.Format("service_response_sent,{0},{1}", service, time_stamp);
-                        csv.AppendLine(newServiceResponse);
-                        // end
+                        MsgLogWrite("service_response_sent", service);
 
                         var s = sb.ToString();
                         Socket.SendAsync(s, ok => { });
@@ -301,11 +292,7 @@ namespace Ros
             });
 
             // code to write to a file
-            DateTime now = DateTime.Now;
-            var time_stamp = now.ToString();
-            var newPublisher = string.Format("publisher,{0},{1}", topic, time_stamp);
-            csv.AppendLine(newPublisher);
-            // end
+            MsgLogWrite("publisher", topic);
 
             //UnityEngine.Debug.Log("Adding publisher " + sb.ToString());
             Socket.SendAsync(sb.ToString(), ok => { });
@@ -337,11 +324,7 @@ namespace Ros
             sb.Append('}');
 
             // code to write to a file
-            DateTime now = DateTime.Now;
-            var time_stamp = now.ToString();
-            var newService = string.Format("add_service,{0},{1}", service, time_stamp);
-            csv.AppendLine(newService);
-            // end
+            MsgLogWrite("add_service", service);
 
             Services.Add(service, callback);
             Socket.SendAsync(sb.ToString(), ok => { });
@@ -367,24 +350,17 @@ namespace Ros
             var s = sb.ToString();
             //UnityEngine.Debug.Log("Publishing " + s.Substring(0, s.Length > 200 ? 200 : s.Length));
 
-            DateTime now = DateTime.Now;
-            var time_stamp = now.ToString();
-
             if (completed == null)
             {
                 // code to write to a file
-                var newPublish = string.Format("publish,{0},{1}", topic, time_stamp);
-                csv.AppendLine(newPublish);
-                // end
+                MsgLogWrite("publish", topic);
 
                 Socket.SendAsync(s, ok => { });
             }
             else
             {
                 // code to write to a file
-                var newPublish = string.Format("publish,{0},{1}", topic, time_stamp);
-                csv.AppendLine(newPublish);
-                // end
+                MsgLogWrite("publish", topic);
 
                 Socket.SendAsync(s, ok => completed());
             }
@@ -427,11 +403,7 @@ namespace Ros
             });
 
             // code to write to a file
-            DateTime now = DateTime.Now;
-            var time_stamp = now.ToString();
-            var newSubscribe = string.Format("subscribe,{0},{1}", topic, time_stamp);
-            csv.AppendLine(newSubscribe);
-            // end
+            MsgLogWrite("subscribe", topic);
 
             //UnityEngine.Debug.Log("Adding subscriber " + sb.ToString());
             Socket.SendAsync(sb.ToString(), ok => { });
@@ -910,6 +882,34 @@ namespace Ros
                 return UnserializeInternal(version, node["data"], type);
             }
             return UnserializeInternal(version, node, type);
+        }
+
+        void MsgLogWrite(string kind, string topic)
+        {
+            StartTimer.Stop();
+
+            long lElapsedTicks = StartTimer.ElapsedTicks;
+            long lTicksPerSecond = Stopwatch.Frequency;
+            double lMilliseconds = 1000.0 * (double)lElapsedTicks / (double)lTicksPerSecond;
+
+            double time_stamp = lMilliseconds / 1000;
+            var newMsg = string.Format("{0},{1},{2}", kind,topic, time_stamp);
+
+            csv.AppendLine(newMsg);
+
+            StartTimer.Start();
+        }
+
+        void MsgLogInit()
+        {
+            StartTimer.Start();
+            System.IO.File.WriteAllText("msgs_log.csv", csv.ToString());
+            csv.AppendLine("type,topic-service,time_stamp");
+        }
+
+        void MsgLogWriteOut()
+        {
+            System.IO.File.AppendAllText("msgs_log.csv", csv.ToString());
         }
 
     }
