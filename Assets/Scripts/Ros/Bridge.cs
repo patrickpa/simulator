@@ -893,7 +893,7 @@ namespace Ros
             double lMilliseconds = 1000.0 * (double)lElapsedTicks / (double)lTicksPerSecond;
 
             double time_stamp = lMilliseconds / 1000;
-            var newMsg = string.Format("{0},{1},{2}", kind,topic, time_stamp);
+            var newMsg = string.Format("{0},{1},{2},{3}", kind, topic, time_stamp, Port);
 
             csv.AppendLine(newMsg);
 
@@ -902,14 +902,17 @@ namespace Ros
 
         void MsgLogInit()
         {
-            StartTimer.Start();
-            System.IO.File.WriteAllText("msgs_log.csv", csv.ToString());
-            csv.AppendLine("type,topic-service,time_stamp");
+            if (csv.Length == 0) {
+                System.IO.File.WriteAllText(string.Format("msgs_log-{0}_{1}.csv", Address, Port), string.Empty);
+                StartTimer.Start();
+                csv.AppendLine(string.Format("type,topic-service,time_stamp,{0}_{1}", Address, Port));
+            }
         }
 
         void MsgLogWriteOut()
         {
-            System.IO.File.AppendAllText("msgs_log.csv", csv.ToString());
+            System.IO.File.AppendAllText(string.Format("msgs_log-{0}_{1}.csv", Address, Port), csv.ToString());
+            csv = new StringBuilder();
         }
 
     }

@@ -52,7 +52,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDebugSpawn: 0
-  spawnArea: {x: 8000, y: 0.03, z: 8000}
+  spawnArea: {x: 750, y: 0.03, z: 750}
   despawnDistance: 300
   npcPrefab: {fileID: 1798218806277080, guid: 807c2106adabd0d42a932df35c3b7317, type: 2}
   npcVehicles:
