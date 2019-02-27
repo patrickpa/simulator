@@ -36,7 +36,7 @@ public class InitialConfiguration
     public bool enable_traffic { get; set; }
     public bool enable_pedestrian { get; set; }
     public int traffic_density { get; set; }
-    public bool enable_msg_log {get; set;} = false;
+    public bool enable_msg_log {get; set;} = true;
 }
 
 public class VehicleConfig

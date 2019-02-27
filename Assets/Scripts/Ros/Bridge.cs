@@ -37,7 +37,7 @@ namespace Ros
         public static bool canConnect = false; // THIS IS VERY VERY BAD!! PLEASE DONT USE GLOBAL VARIABLES :(
 
         //Msg Logging Variables//
-        public bool enable_msg_log = false;
+        public bool enable_msg_log = true;
         private StringBuilder csv = new StringBuilder();
         private Stopwatch StartTimer = new Stopwatch();
         //END//
